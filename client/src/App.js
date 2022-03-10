@@ -3,7 +3,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import Button from 'react-bootstrap/Button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import { AgGridReact } from 'ag-grid-react';
 
@@ -15,6 +15,7 @@ function App() {
   const [filter, setFilter] = useState(false);
   const [sort, setSort] = useState(false);
   const [pagination, setPagination] = useState(false);
+  const gridRef = useRef();
 
   const [rowData] = useState([
     { make: 'Toyota', model: 'Celica', price: 35000 },
@@ -28,10 +29,15 @@ function App() {
     { field: 'price' },
   ]);
 
+
+
+
   const defaultColDef = {
     filter: filter,
     flex: 1,
     sortable: sort,
+    editable: true,
+    resizable: true,
   };
 
   const sortHandler = () => {
@@ -53,6 +59,17 @@ function App() {
     setAg(true);
   }, [sort, filter, pagination]);
 
+
+  // Adding function that make you choosing what is your sort 
+  const onPriceFirst = useCallback(()=> {
+    gridRef.current.columnApi.moveColumns(
+      ['price', 'model' ],
+      0
+    );
+  },[] );
+
+ 
+  
   return (
     <>
       <div className="mb-5">
@@ -86,6 +103,13 @@ function App() {
                   >
                     Pagination
                   </Button>
+                  <Button
+                    variant={pagination ? `primary` : `outline-primary`}
+                    size="sm"
+                    onClick={onPriceFirst}
+                  >
+                    Sort by Price
+                  </Button>
                 </Stack>
               </div>
             </div>
@@ -93,12 +117,19 @@ function App() {
           <Col sm={10}>
             <div className="ml-2 bg-dark border border-black rounded">
               <div className="ag-theme-alpine m-3 " style={{ height: '400px' }}>
+
+
+
                 {ag && (
                   <AgGridReact
+                    
                     columnDefs={columnDefs}
                     defaultColDef={defaultColDef}
                     rowData={rowData}
                     pagination={pagination}
+                    ref={gridRef}
+
+
                   />
                 )}
               </div>
